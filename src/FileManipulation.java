@@ -4,6 +4,10 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -12,11 +16,15 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentType;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -32,6 +40,9 @@ public class FileManipulation {
 	int count = 0; //count how many files generated
 	int count_correct = 0; //count how many files are correct format
 	int count_incorrect = 0; //count how many files are incorrect format
+	List<String> rejected = new ArrayList<String>();//wrongly formatted names
+	List <String> wrongFileTypes = new ArrayList<String>();//wrong file types
+	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public FileManipulation(String path) {
 		/*
@@ -67,6 +78,7 @@ public class FileManipulation {
 		try {
 			if(this.folder.exists()) {
 				listAllFiles(this.folder);
+				writeLogs(this.folder.getPath());
 				System.out.println("Files generated:" + this.count);
 				System.out.println("Files passed verification:" + this.count_correct);
 				System.out.println("Files failed verification:" + this.count_incorrect);
@@ -79,7 +91,7 @@ public class FileManipulation {
 		}
 	}
 
-	public void updateXML(Document doc, String main_path, String filename) {
+	public void updateXML(Document doc, String main_path, String filename, String createdDate) {
 		// Get the root element
 		// Node properties_ = doc.getFirstChild();
 		NodeList listOfChildNodes = doc.getElementsByTagName("entry");
@@ -90,7 +102,7 @@ public class FileManipulation {
 			// System.out.println(node_.getTextContent());
 			Node nodeAttr = attr.getNamedItem("key");
 			if("cm:created".equals(nodeAttr.getTextContent())) {
-				node_.setTextContent(LocalDate.now().toString());
+				node_.setTextContent(createdDate);
 			}
 			if ("acn:HCOCaseType".equals(nodeAttr.getTextContent())) {
 				// System.out.println("I am in");
@@ -115,6 +127,17 @@ public class FileManipulation {
 		Transformer transformer;
 		try {
 			transformer = transformerFactory.newTransformer();
+			
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+		   
+		    //Creating !DOCTYPE
+		    DOMImplementation domImpl = doc.getImplementation();
+		    DocumentType doctype = domImpl.createDocumentType("doctype",
+		        null,
+		        "http://java.sun.com/dtd/properties.dtd");
+		    transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, doctype.getSystemId());
+			
 			DOMSource source = new DOMSource(doc);
 			StreamResult result = new StreamResult(new File(path + "\\" + filename + ".metadata.properties.xml"));
 			//System.out.println("Generating:" + filename + ".metadata.properties.xml");
@@ -152,8 +175,7 @@ public class FileManipulation {
 	}
 
 	public void listAllFiles(File folder) throws IOException {
-		List<String> rejected = new ArrayList<String>();//wrongly formatted names
-		List <String> wrongFileTypes = new ArrayList<String>();//wrong file types
+		
 		//recursive call through the file tree
 		for (File file_ : folder.listFiles(createFilter(wrongFileTypes))) {
 			//get list of approved file names and directories in the current folder
@@ -172,7 +194,10 @@ public class FileManipulation {
 					//code won't verify file name if corresponding .xml is generated -- stops overwritting
 					if (VerifyFileName(file_.getName())) {
 						// if name is correctly formated, generate .xml
-						updateXML(this.doc, folder.getPath(), file_.getName());
+						BasicFileAttributes attr = Files.readAttributes(file_.toPath(), BasicFileAttributes.class);
+						String dateCreated = dateFormat.format(attr.creationTime().toMillis());
+						
+						updateXML(this.doc, folder.getPath(), file_.getName(), dateCreated);
 					} else {
 						this.count_correct--;
 						this.count_incorrect++;
@@ -181,18 +206,20 @@ public class FileManipulation {
 				}
 			}
 		}
+	}
+	
+	private void writeLogs(String pathLogs) throws IOException {
 		/* trying out new output with '|'
 		 * call write function
 		 */
 		//Files.write(Paths.get(folder.getPath(), "Incorrect_Formating.log"), rejected));
-		BufferedWriter writer = new BufferedWriter(new FileWriter(folder.getPath() +"\\"+"Incorrect_Formating.log", false));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(pathLogs +"\\"+"Incorrect_Formating.log", false));
 	    writer.append(String.join("|", rejected));   	     
 	    writer.close();
 		//Files.write(Paths.get(folder.getPath(), "Unsupported_FileType.log"), wrongFileTypes);
-	    writer = new BufferedWriter(new FileWriter(folder.getPath() +"\\"+"Unsupported_FileType.log", false));
+	    writer = new BufferedWriter(new FileWriter(pathLogs +"\\"+"Unsupported_FileType.log", false));
 	    writer.append(String.join("|", wrongFileTypes));   	     
 	    writer.close();
-		
 	}
 
 	public boolean VerifyFileName(String file_name) {
