@@ -220,11 +220,11 @@ public class FileManipulation {
 		DateFormat logDate = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		System.out.println(logDate.format(currentTimestamp));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(pathLogs +"/OutputLogs/Incorrect_Formating"+ logDate.format(currentTimestamp) + ".log", false));
-	    writer.append(String.join("|/n", rejected));   	     
+	    writer.append(String.join("|\n", rejected));   	     
 	    writer.close();
 		//Files.write(Paths.get(folder.getPath(), "Unsupported_FileType.log"), wrongFileTypes);
 	    writer = new BufferedWriter(new FileWriter(pathLogs +"/OutputLogs/Unsupported_FileType"+ logDate.format(currentTimestamp) + ".log", false));
-	    writer.append(String.join("|/n", wrongFileTypes));   	     
+	    writer.append(String.join("|\n", wrongFileTypes));   	     
 	    writer.close();
 	}
 
