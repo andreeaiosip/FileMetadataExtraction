@@ -196,7 +196,7 @@ public class FileManipulation {
 					if (VerifyFileName(file_.getName())) {
 						// if name is correctly formated, generate .xml
 						BasicFileAttributes attr = Files.readAttributes(file_.toPath(), BasicFileAttributes.class);
-						String dateCreated = dateFormat.format(attr.creationTime().toMillis());
+						String dateCreated = dateFormat.format(attr.lastModifiedTime().toMillis());
 						
 						updateXML(this.doc, folder.getPath(), file_.getName(), dateCreated);
 					} else {
@@ -220,11 +220,11 @@ public class FileManipulation {
 		DateFormat logDate = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		System.out.println(logDate.format(currentTimestamp));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(pathLogs +"/OutputLogs/Incorrect_Formating"+ logDate.format(currentTimestamp) + ".log", false));
-	    writer.append(String.join("|", rejected));   	     
+	    writer.append(String.join("|/n", rejected));   	     
 	    writer.close();
 		//Files.write(Paths.get(folder.getPath(), "Unsupported_FileType.log"), wrongFileTypes);
 	    writer = new BufferedWriter(new FileWriter(pathLogs +"/OutputLogs/Unsupported_FileType"+ logDate.format(currentTimestamp) + ".log", false));
-	    writer.append(String.join("|", wrongFileTypes));   	     
+	    writer.append(String.join("|/n", wrongFileTypes));   	     
 	    writer.close();
 	}
 
