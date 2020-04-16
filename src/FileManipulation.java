@@ -196,7 +196,7 @@ public class FileManipulation {
 					if (VerifyFileName(file_.getName())) {
 						// if name is correctly formated, generate .xml
 						BasicFileAttributes attr = Files.readAttributes(file_.toPath(), BasicFileAttributes.class);
-						String dateCreated = dateFormat.format(attr.lastModifiedTime().toMillis());
+						String dateCreated = dateFormat.format(attr.creationTime().toMillis());
 						
 						updateXML(this.doc, folder.getPath(), file_.getName(), dateCreated);
 					} else {
