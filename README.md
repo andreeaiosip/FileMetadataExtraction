@@ -20,5 +20,5 @@ java -jar MetadataExtractor.jar fullPathNameToYourFolderFullOfTestFiles
 
 Example:
 ```
-C:\Users\antonela.mrkalj\Desktop>java -jar MetadataExtractor.jar C:\\Users\\antonela.mrkalj\\git\\FileMetadataExtraction\\TEST
+C:\Users\bob\Desktop>java -jar MetadataExtractor.jar C:\\Users\\bob\\git\\FileMetadataExtraction\\TEST
 ```
