@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -213,11 +214,16 @@ public class FileManipulation {
 		 * call write function
 		 */
 		//Files.write(Paths.get(folder.getPath(), "Incorrect_Formating.log"), rejected));
-		BufferedWriter writer = new BufferedWriter(new FileWriter(pathLogs +"\\"+"Incorrect_Formating.log", false));
+		
+		new File(pathLogs + "/OutputLogs").mkdir();
+		Date currentTimestamp = new Date();
+		DateFormat logDate = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		System.out.println(logDate.format(currentTimestamp));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(pathLogs +"/OutputLogs/Incorrect_Formating"+ logDate.format(currentTimestamp) + ".log", false));
 	    writer.append(String.join("|", rejected));   	     
 	    writer.close();
 		//Files.write(Paths.get(folder.getPath(), "Unsupported_FileType.log"), wrongFileTypes);
-	    writer = new BufferedWriter(new FileWriter(pathLogs +"\\"+"Unsupported_FileType.log", false));
+	    writer = new BufferedWriter(new FileWriter(pathLogs +"/OutputLogs/Unsupported_FileType"+ logDate.format(currentTimestamp) + ".log", false));
 	    writer.append(String.join("|", wrongFileTypes));   	     
 	    writer.close();
 	}
