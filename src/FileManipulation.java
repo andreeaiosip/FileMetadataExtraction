@@ -202,7 +202,7 @@ public class FileManipulation {
 					} else {
 						this.count_correct--;
 						this.count_incorrect++;
-						rejected.add(folder.getName() +"\\"+ file_.getName());
+						rejected.add(file_.getPath());
 					}
 				}
 			}
@@ -310,7 +310,7 @@ public class FileManipulation {
 			else if(dir.isDirectory())//if file is folder allow it		
 				return true;
 			this.count_incorrect++;
-			wrongFileTypes.add(dir.getName() +"\\"+ name);//if nothing from above, filter it out and add to list
+			wrongFileTypes.add(dir.getPath() + "\\" + name);//if nothing from above, filter it out and add to list
 			return false;
 		};
 
